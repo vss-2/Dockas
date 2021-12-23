@@ -1,0 +1,16 @@
+FROM alpine
+# version: 
+# FROM alpine:3.15
+
+RUN apk -U upgrade && \
+apk add nodejs && \
+apk add npm && \
+mkdir /home/jwt && \
+cd /home/jwt
+
+RUN mkdir config model middleware && \
+touch config/database.js middleware/auth.js model/user.js && \
+touch app.js index.js
+
+RUN npm init -y
+RUN npm install mongoose express jsonwebtoken dotenv bcryptjs nodemon
