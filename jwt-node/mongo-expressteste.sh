@@ -1,0 +1,1 @@
+docker run -it -p 12346:8081 --network `cat mongonet_id.txt` -e ME_CONFIG_MONGODB_PORT="12345" -e ME_CONFIG_MONGODB_URL="mongodb://"+`docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mongoteste`"/" --name mongo-expressteste mongo-express
