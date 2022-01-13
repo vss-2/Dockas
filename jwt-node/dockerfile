@@ -1,4 +1,6 @@
-FROM alpine
+FROM alpine:3.15.0
+FROM mongo:5.0.5
+FROM mongo-express:1.0.0-alpha.4
 
 RUN apk -U upgrade && \
 apk add nodejs && \
@@ -11,14 +13,10 @@ WORKDIR /home/jwt/
 
 COPY app.js /home/jwt/
 COPY index.js /home/jwt/
-COPY user.js /home/jwt/model
-COPY database.js /home/jwt/config/
-COPY auth.js /home/jwt/middleware/
+COPY /model/user.js /home/jwt/model
+COPY /config/database.js /home/jwt/config/
+COPY /middleware/auth.js /home/jwt/middleware/
 COPY .env /home/jwt/
 
 RUN npm init -y
 RUN npm install mongoose express jsonwebtoken dotenv bcryptjs nodemon
-
-FROM mongo:5.0.5
-
-FROM mongo-express
