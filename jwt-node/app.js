@@ -15,14 +15,14 @@ app.use(express.json());
 // }
 
 app.post('/register', async (req, res) => {
-	// Mandar pro Mongoose o que vier na requisição
-	// then
-	// Devolver o res pro usuário
 	try {
+
 		const { name_first, name_last, email, password } = req.body;
+
 		if(!(email && password && name_first && name_last)){
 			res.status(400).send('Favor preencher todos os campos');
 		}
+
 		const oldUser = await User.findOne({ email });
 
 		if(oldUser){
@@ -30,26 +30,28 @@ app.post('/register', async (req, res) => {
 		}
 
 		encryptedPassword = await bcrypt.hash(password, 10);
-
-		const user = await User.create({
-					name_first,
-					name_last,
-					email: email.toLowerCase(),
-					password: encryptedPassword
+		
+		const user = await User.create({                              
+			name_first,                           
+			name_last,                            
+			email: email.toLowerCase(),           
+			password: encryptedPassword,
+			expiresAfterSeconds: 60*60*12         
 		});
 
 		const token = jwt.sign(
-				{
-					user_id: user._id,
-					email
-				},
-				process.env.TOKEN_KEY,
-				{
-					expiresIn: '12h',
-				});
+			{
+				user_id: user._id,
+				email
+			},
+			process.env.TOKEN_KEY,
+			{
+				expiresIn: '12h',
+			}
+		);
 
-		user.token = token;
-		res.status(201).json(user);
+		await User.updateOne({_id: user._id}, {$set: {"token": token}});
+		res.status(201).json(`Bem-vindo(a) ${name_first}`);
 
 	} catch (e) {
 		console.error(e);
@@ -60,12 +62,25 @@ app.post('/welcome', auth,  (req, res) => {
 	res.status(200).send('Olá mundo');
 });
 
-app.post('/login', async (req, res) => {
-	// Receber dados e verificar no Mongoose
-	// then
-	// Devolver o res pro usuário
+app.post('/logout', auth, async (req, res) => {
+	const token = req.body.token || req.query.token || req.headers['x-access-token'];
+	if(token){
+			await User.findOneAndUpdate(
+					{ token: token },
+					{ token: null },
+					{ new: false }
+			);
+			const user = await User.findOne({ token });console.log(user);
+			res.status(200).send('Logout');
+	} else {
+			res.status(200).send('Logout');
+	}
 
+});
+
+app.post('/login', async (req, res) => {
 	try {
+
 		const { email, password } = req.body;
 		if(!(email && password)){
 			res.status(400).send('Favor preencher todos os campos.');
@@ -74,6 +89,7 @@ app.post('/login', async (req, res) => {
         const user = await User.findOne({ email });
 
         if(user && (await bcrypt.compare(password, user.password))) {
+
 		    const token = jwt.sign(
 				    {
 					    user_id: user._id,
@@ -82,17 +98,18 @@ app.post('/login', async (req, res) => {
 				    process.env.TOKEN_KEY,
 				    {
 					    expiresIn: '12h',
-				    });
+				    }
+			);
 
-	    	user.token = token;
-    		res.status(201).json(user.token);
+			await User.updateOne({_id: user._id}, {$set: {"token": token}});
+    		res.status(201).json(`Olá novamente ${user.name_first}`);
+
         } else {
         	res.status(400).send('Email ou senha inválidos.');
 		}
 	} catch (e) {
 		console.error(e);
 	}
-
 
 });
 
