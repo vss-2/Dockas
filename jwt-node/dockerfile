@@ -12,6 +12,7 @@ cd /home/jwt/
 WORKDIR /home/jwt/
 
 COPY app.js /home/jwt/
+COPY app.test.js /home/jwt/
 COPY index.js /home/jwt/
 COPY /model/user.js /home/jwt/model
 COPY /config/database.js /home/jwt/config/

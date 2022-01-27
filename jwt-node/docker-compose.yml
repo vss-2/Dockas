@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:5.0.5
+    ports: 
+      - 12345:27017
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - 12346:8081
+    environment:
+      ME_CONFIG_MONGODB_PORT: "12345"
+    depends_on:
+      - "mongo"
+
+  nodejs:
+    image: node:alpine
+    ports:
+      - 4001:4001
+    depends_on:
+      - "mongo"
