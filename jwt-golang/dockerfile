@@ -1,8 +1,13 @@
-FROM alpine:3.15.0
 FROM golang:1.17.6-alpine3.15
 
-RUN mkdir /home/jwt/
-
-COPY main.go /home/jwt/
-
-RUN go run main.go
+RUN mkdir -p /home/jwt
+WORKDIR /home/jwt
+COPY ./main.go /home/jwt
+EXPOSE 4001
+RUN apk add git
+RUN export GO111MODULE=on
+RUN go env -w GO111MODULE=auto
+RUN go get github.com/dgrijalva/jwt-go
+RUN go get github.com/joho/godotenv
+RUN go build
+ENTRYPOINT [ "/home/jwt" ]
