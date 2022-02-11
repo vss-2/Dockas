@@ -7,6 +7,8 @@ import (
 	"context"
 	jwt "github.com/dgrijalva/jwt-go"
 	dotenv "github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // Global variables
@@ -17,6 +19,9 @@ var workdir string
 var collection *mongo.Collection
 
 // User datatype
+// in mongo, create database and collection: 
+//   use User;
+//   db.User.user.insert({...})
 type User struct {
 	Name_first	string `bson:"text"`
 	Name_last	string `bson:"text"`
@@ -28,6 +33,12 @@ type User struct {
 func doNothing(w http.ResponseWriter, r *http.Request){}
 
 func favicon(w http.ResponseWriter, r *http.Request){
+	envs, err := dotenv.Read(".env")
+	
+	if err != nil {
+		log.Fatal("Error while finding .env file")
+	}
+
 	// Sample source: https://favicon.cc/?action=icon&file_id=107462
 	http.ServeFile(w, r, string(envs["WORKDIR"])+string("favicon.ico"))
 }
@@ -62,16 +73,28 @@ func isAuthorized(endpoint func(http.ResponseWriter, *http.Request)) http.Handle
 }
 
 // Equivalente ao Routes no Node
-func handleRequests(apiport string){
+func handleRequests(envs map[string]string){
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/favicon.ico", favicon)
-	log.Fatal(http.ListenAndServe(string(":")+string(apiport), nil))
+	log.Fatal(http.ListenAndServe(string(":")+string(envs["APIPORT"]), nil))
+}
+
+func variables() map[string]string {
+	envs, err := dotenv.Read(".env")
+	
+	if err != nil {
+		log.Fatal("Error while finding .env file")
+	}
+
+	return envs
 }
 
 // https://www.digitalocean.com/community/tutorials/how-to-use-go-with-mongodb-using-the-mongodb-go-driver-pt
 func init(){
-
+	envs := variables()
 	ctx := context.TODO()
+	mongodbURI := string(envs["MONGODBURI"])
+	fmt.Print(mongodbURI+"\n")
 	clientOptions := options.Client().ApplyURI(envs["MONGODBURI"])
 	client, err := mongo.Connect(ctx, clientOptions)
 
@@ -84,23 +107,19 @@ func init(){
 		log.Fatal(err)
 	}
 
-	collection = client.Collection("user")
-
+	collection = client.Database("User").Collection("user")
+	fmt.Print("Server conectado!\n")
 }
 
 func main(){
-	envs, err := dotenv.Read(".env")
-	if err != nil {
-		log.Fatal("Error while finding .env file")
-	}
-
+	envs := variables()
 	jwtsecret := envs["JWTSECRET"]
 	apiport := envs["APIPORT"]
-	mongodbURI := envs["MONGODBURI"]
+	// mongodbURI := envs["MONGODBURI"]
 	workdir := envs["WORKDIR"]
 	fmt.Println("JWTSECRET: "+jwtsecret)
 	fmt.Println("APIPORT: "+apiport)
-	fmt.Println("MONGODBURI: "+mongodbURI)
+	// fmt.Println("MONGODBURI: "+mongodbURI)
 	fmt.Println("WORKDIR: "+workdir)
-	handleRequests(envs["APIPORT"])
+	handleRequests(envs)
 }
