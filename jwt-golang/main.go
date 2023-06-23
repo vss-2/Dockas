@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"context"
-	"encoding/json"
-	jwt "github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt"
 	dotenv "github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	_ "strings"
+	_ "io/ioutil"
+	_ "encoding/json"
 )
 
 // Global variables
@@ -25,12 +27,13 @@ var collection *mongo.Collection
 //   use User;
 //   db.User.user.insert({...})
 type User struct {
-	Name_first	string `bson:"text"`
-	Name_last	string `bson:"text"`
-	Email		string `bson:"text"`
-	Password	string `bson:"text"`
-	Token		string `bson:"text"`
+	name_first	string
+	name_last	string
+	email		string
+	password	string
 }
+
+var bodyJSON User
 
 func doNothing(w http.ResponseWriter, r *http.Request){}
 
@@ -140,15 +143,19 @@ func isValid(w http.ResponseWriter, r *http.Request){
 	if r.Header["Token"] != nil {
 		// Esse interface é um objeto (JSON-like) pode ser usado para melhor compreensão do erro
 		token, err := jwt.Parse(r.Header["Token"][0], func(token *jwt.Token) (interface{}, error){
+			token := r.Header["Token"][0];
 
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				// token = nil, erro = erro
+			if _, ok := token.Method(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Error while trying signing method", ok)
 			}
 
-			// token = secret, erro = nil
+			if valid := jwt.SigningMethod.Verify(token, ); !valid {
+				return nil, fmt.Errorf("Error token verification is not valid", valid)
+			}
+
 			return jwtsecret, nil
 		})
+
 		_, _ = token, err
 	} else {
 		// fmt.Fprintf(w, "Access unauthorized")
@@ -163,7 +170,7 @@ func isAuthorized(endpoint func(http.ResponseWriter, *http.Request)) http.Handle
 
 // Equivalente ao Routes no Node
 func handleRequests(envs map[string]string){
-	http.HandleFunc("/", homePage)
+	http.HandleFunc("/", isValid)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/register", userRegister)
 	log.Fatal(http.ListenAndServe(string(":")+string(envs["APIPORT"]), nil))

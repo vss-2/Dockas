@@ -7,7 +7,9 @@ EXPOSE 4001
 RUN apk add git
 RUN export GO111MODULE=on
 RUN go env -w GO111MODULE=auto
-RUN go get github.com/dgrijalva/jwt-go
-RUN go get github.com/joho/godotenv
+RUN go get github.com/golang-jwt/jwt && \
+    go get github.com/joho/godotenv && \
+    go get go.mongodb.org/mongo-driver/mongo && \
+    go get go.mongodb.org/mongo-driver/mongo/options
 RUN go build
 ENTRYPOINT [ "/home/jwt" ]
