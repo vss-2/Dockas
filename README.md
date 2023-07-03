@@ -1,25 +1,9 @@
-#### Executar em modo interativo
-* docker run -p 4001:4001 --net=bridge -it \$\{container}
+# Dockas
 
-#### Buildar
-* docker build -t \$\{nome container} ${path_dockerfile}
+## Description
+### A hub for simple and common implementations using dockerfile.
 
-#### Executar container em moto detach (no background)
-* docker run -d \$\{nome_container}
-
-#### Mapear porta host:container
-* docker -p 12345:4001
-
-#### Iniciar o container
-* docker start -i \$\{container}
-
-#### Executar um comando dentro de um container em execução
-* docker exec -it \$\{nome_container} \$\{comando, ex: bash}
-* Obs: -i (interative) -t (tty) e -d (detach) podem ser usados juntos em -dit
-
-#### Criando uma rede interna para containers
-* docker network create \$\{nome_container_net} --driver bridge >> container_net_id.txt
-* Obs: adicionar --network \$\{nome_container_net} para runs ou execs
-
-#### Ver quais containers estão conectados na bridge
-* docker inspect \$\{nome_container_net}
+## List of projects/folders
+* [flora-spring](https://github.com/vss-2/Dockas/tree/main/flora-spring): a back-end implementation using Spring boot to connect MySQL and MongoDB.
+* [jwt-node](https://github.com/vss-2/Dockas/tree/main/jwt-node): a back-end implementation using NodeJS to be used for authentication and authorization (access control purposes) following JWT standards.
+* [jwt-golang](https://github.com/vss-2/Dockas/tree/main/jwt-golang) partial implementation of JWT using Golang. Just a try out.
