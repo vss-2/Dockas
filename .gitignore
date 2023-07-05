@@ -41,3 +41,6 @@ build/
 
 # Subdirectories .gitignore
 *.gitignore
+
+# Redis DB
+*.rdb
