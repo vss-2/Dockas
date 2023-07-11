@@ -1,0 +1,39 @@
+type User {
+    id: ID!,
+    username: String!,
+    email: String!,
+    # plants: [Plant],
+    # badges: [Badge],
+    signup: Int
+}
+
+input UserInput {
+    username: String!,
+    email: String!
+}
+
+type Plant {
+    id: ID!,
+    type: String,
+    owner_user_id: String!,
+    planted: Int!,
+    harvests: [Int],
+    died: Int
+}
+
+type Badge {
+    id: ID!,
+    description: String!,
+    achieved: Int!,
+    owner_user_id: String!
+}
+
+type Query {
+    findAllPlants: [Plant],
+    findAllUsers: [User],
+    findOneUser: User
+}
+
+# type Mutation {
+#     saveUser(user: UserInput): User
+# }
