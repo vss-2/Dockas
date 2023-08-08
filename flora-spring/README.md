@@ -38,3 +38,18 @@ curl -X POST http://localhost:8080/user/register \
 ```
 curl -X GET http://localhost:8080/user/list/all
 ```
+
+## Install
+```sh
+git clone --depth 1 https://github.com/vss-2/Dockas
+mv ./flora-spring/* ../
+cd ../
+rm -rf ./Dockas/
+cd ./flora-spring/flora
+maven install
+```
+
+## Initialize
+```sh
+maven spring-boot:run
+```
